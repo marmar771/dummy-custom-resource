@@ -1,80 +1,62 @@
 # dummy-operator
-// TODO(user): Add simple overview of use/purpose
+A simple dummy kubernetes operator
 
 ## Description
-// TODO(user): An in-depth paragraph about your project and overview of use
+This operator creates a new pod for each API object, when object is deleted, the pod is also deleted. This operator also logs the Pods status in the yaml status.podStatus value.
+In addition the operator copies the value from spec.message to status.specEcho and logs the name, namespace and spec.message.
 
 ## Getting Started
-You’ll need a Kubernetes cluster to run against. You can use [KIND](https://sigs.k8s.io/kind) to get a local cluster for testing, or run against a remote cluster.
-**Note:** Your controller will automatically use the current context in your kubeconfig file (i.e. whatever cluster `kubectl cluster-info` shows).
+You’ll need a Kubernetes cluster to run against. You can use MINIKUBE.
 
 ### Running on the cluster
-1. Install Instances of Custom Resources:
+1. Pull the image from DockerHub:
 
 ```sh
-kubectl apply -f config/samples/
+docker pull marmar771/dummy-operator:v1.0.0
 ```
 
-2. Build and push your image to the location specified by `IMG`:
+2. Run the docker image. 
+If you want to check the name of the previously pulled image, please run this command:
 
 ```sh
-make docker-build docker-push IMG=<some-registry>/dummy-operator:tag
+docker image list --all
 ```
-
-3. Deploy the controller to the cluster with the image specified by `IMG`:
+To run the image, please exec this command:
 
 ```sh
-make deploy IMG=<some-registry>/dummy-operator:tag
+docker run <image-name>
 ```
 
-### Uninstall CRDs
-To delete the CRDs from the cluster:
+3. Apply the CRD:
 
 ```sh
-make uninstall
+kubectl apply -f config/crd/bases/cache.interview.com_dummies.yaml
 ```
 
-### Undeploy controller
-UnDeploy the controller from the cluster:
+4. Create API object:
 
 ```sh
-make undeploy
+kubectl create -f config/samples/cache_v1alpha1_dummy.yaml
 ```
 
-## Contributing
-// TODO(user): Add detailed information on how you would like others to contribute to this project
-
-### How it works
-This project aims to follow the Kubernetes [Operator pattern](https://kubernetes.io/docs/concepts/extend-kubernetes/operator/).
-
-It uses [Controllers](https://kubernetes.io/docs/concepts/architecture/controller/),
-which provide a reconcile function responsible for synchronizing resources until the desired state is reached on the cluster.
-
-### Test It Out
-1. Install the CRDs into the cluster:
+4. Check if pod is created by exec this command:
 
 ```sh
-make install
+kubectl get pods
 ```
 
-2. Run your controller (this will run in the foreground, so switch to a new terminal if you want to leave it running):
+5. Check if the status.specEcho and status.podStatus are modified. When pod's status will be running, the status.podStatus should be "Running".
 
 ```sh
-make run
+kubectl get dummy.cache.interview.com/dummy -o yaml
 ```
 
-**NOTE:** You can also run this in one step by running: `make install run`
-
-### Modifying the API definitions
-If you are editing the API definitions, generate the manifests such as CRs or CRDs using:
+5. Delete the API object and check if the pod will get terminated:
 
 ```sh
-make manifests
+kubectl delete -f config/samples/cache_v1alpha1_dummy.yaml
+kubectl get pods
 ```
-
-**NOTE:** Run `make --help` for more information on all potential `make` targets
-
-More information can be found via the [Kubebuilder Documentation](https://book.kubebuilder.io/introduction.html)
 
 ## License
 
